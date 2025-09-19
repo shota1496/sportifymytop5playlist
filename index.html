@@ -7,16 +7,53 @@
   </head>
 
   <body>
-    <iframe
-      title="Spotify Embed: Recommendation Playlist "
-      src="https://open.spotify.com/embed/playlist/5JAOBf1t4sd2ZSVyZkXkSf?utm_source=generator&theme=0"
-      width="100%"
-      height="100%"
-      style="min-height: 500px"
-      frameborder="0"
-      allow="autoplay; clipboard-write; encrypted-media; fullscreen;
-    picture-in-picture"
-      loading="lazy"
-    ></iframe>
+    <div id="list"></div>
+    <script>
+      addEventListener("load", (event) => {
+        // Authorization token that must have been created previously. See : https://developer.spotify.com/documentation/web-api/concepts/authorization
+        const token =
+          "BQCQTIUkGJa3JPHA1k8xSHKPjva1oeupEeCLd-5Ghkh6EwLv-Y7gzHwFFmfxL52O6qigaa755GnKoPJBViXfdprgqkVbxVWwQFI5TjDw_PSDEgX2XdOz5VZad2KoEEPyQFYi7AU53lohOOiqlfONYOXWi1iKh4LOcqq-yhz_iMxLdGPFO94qC5WKrEURdWKKTJ1n1BvDl3uFuZtyM6N1ZfwIr5lZ8-MQKPjOhYKKN-l21GSstMqxnstLhse5aWQuHnkdjgSfVwKRTvjDUQivCRcWbdY0gNR_KnBu5RaMHlNvFQ";
+        async function fetchWebApi(endpoint, method, body) {
+          const res = await fetch(`https://api.spotify.com/${endpoint}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            method,
+            body: JSON.stringify(body),
+          });
+          return await res.json();
+        }
+
+        async function getTopTracks() {
+          // Endpoint reference : https://developer.spotify.com/documentation/web-api/reference/get-users-top-artists-and-tracks
+          return (
+            await fetchWebApi(
+              "v1/me/top/tracks?time_range=long_term&limit=5",
+              "GET"
+            )
+          ).items;
+        }
+
+        (async () => {
+          const topTracks = await getTopTracks();
+          console.log(
+            topTracks?.map(
+              ({ name, artists }) =>
+                `${name} by ${artists.map((artist) => artist.name).join(", ")}`
+            )
+          );
+        })();
+
+        (async () => {
+          const topTracks = await getTopTracks();
+          document.getElementById("list").innerText = JSON.stringify(
+            topTracks?.map(
+              ({ name, artists }) =>
+                `${name} by ${artists.map((artist) => artist.name).join(", ")}`
+            )
+          );
+        })();
+      });
+    </script>
   </body>
 </html>
